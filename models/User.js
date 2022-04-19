@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+const bcrypt = require('bcrypt');
 const sequelize = require('../config/connection');
 
 // create our User model
@@ -57,7 +58,20 @@ User.init(
         // use underscores instead of camel-casing (i.e. `comment_text` and not `commentText`)
         underscored: true,
         // make it so our model name stays lowercase in the database
-        modelName: 'user'
+        modelName: 'user',
+        //+- Hooks
+        hooks: {
+            async beforeCreate(userData) {
+                userData.password = await bcrypt.hash(userData.password, 10);
+
+                return userData;
+            },
+            async beforeUpdate(userData) {
+                userData.password = await bcrypt.hash(userData.password, 10);
+                
+                return userData;
+            }
+        }
     }
 );
 
