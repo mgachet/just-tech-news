@@ -1,17 +1,30 @@
 const express = require('express');
-const routes = require('./routes');
-const sequelize = require('./config/connection');
-
 const app = express();
-const PORT = process.env.PORT || 3001;
 
+//#region +- Set Express Handlebars
+const exphbs = require('express-handlebars');
+const hbs = exphbs.create({});
+
+app.engine('handlebars', hbs.engine);
+app.set('view engine', 'handlebars');
+//#endregion
+
+//#region +- Middleware
+const path = require('path');
+app.use(express.static(path.join(__dirname,'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+//#endregion
 
-// turn on routes
+//#region +- Controllers
+const routes = require('./controllers');
 app.use(routes);
+//#endregion
 
-// turn on connection to db and server
+//#region +- Connection to DB and Server
+const sequelize = require('./config/connection');
 sequelize.sync({ force: false }).then(() => {
-  app.listen(PORT, () => console.log('Now listening'));
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => console.log(`Now listening on port ${PORT}`));
 });
+//#endregion
